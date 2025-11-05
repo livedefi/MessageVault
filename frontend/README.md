@@ -1,10 +1,5 @@
 # MessageVault Frontend
 
-<p align="center">
-  <img src="../img.png" alt="MessageVault" width="720" />
-  
-</p>
-
 React/TypeScript (Vite) UI to interact with the `MessageVault` contract on Sepolia using Account Abstraction (ERC‑4337) with Alchemy Account Kit. Includes message reading via Subgraph, wallet connection with RainbowKit, and Alchemy RPC transport.
 
 See also: [Backend README](../backend/README.md) · [Project README](../README.md)

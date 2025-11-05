@@ -4,6 +4,8 @@ This document describes how to verify the contract, generate/compile, and deploy
 
 See also: [Frontend README](frontend/README.md) · [Backend README](backend/README.md)
 
+![MessageVault banner](img.png)
+
 ## Live Demo
 
 A live demo is available at https://messagevault.casaislabs.com.
@@ -13,6 +15,12 @@ Important: This repository does not include or version a local `subgraph/` folde
 ## Table of Contents
 - [Live Demo](#live-demo)
 - [Project Composition & Standards](#project-composition--standards)
+  - [Interaction Flow — Owner and ERC-4337](#interaction-flow--owner-and-erc-4337)
+  - [Interaction Flow — Bundler & Paymaster](#interaction-flow--bundler--paymaster)
+  - [ERC-4337 Components — Bundler & Paymaster](#erc-4337-components--bundler--paymaster)
+   - [Bundler](#bundler)
+   - [Paymaster](#paymaster)
+   - [Project specifics](#project-specifics)
 - [TL;DR — Create and Deploy Quickly](#tldr--create-and-deploy-quickly)
 - [Requirements](#requirements)
 - [Subgraph — Create, Build & Deploy](#subgraph--create-build--deploy)
@@ -44,41 +52,73 @@ How the DApp & Contract Work
 - Indexing:
   - `MessageStored`, `OwnerChanged`, and `EntryPointSet` are indexed by The Graph. The Subgraph is created and managed in Studio (no `subgraph/` in repo).
 
-Interaction Flow — Owner and ERC‑4337
+## Interaction Flow — Owner and ERC-4337
+### Owner (EOA) Flow
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant FE as Frontend (Wagmi)
+    autonumber
+    title Owner (EOA) Flow
+    participant FE as Frontend (Client)
+    participant MV as MessageVault
+
+    FE->>MV: sendMessageToWallet("hello")
+    MV-->>MV: Validate owner
+    MV-->>MV: Store message + increment id
+    MV-->>FE: Emit MessageStored
+```
+
+### ERC-4337 (AA) Flow — EntryPoint v0.7
+```mermaid
+sequenceDiagram
+    autonumber
+    title ERC‑4337 (AA) Flow — EntryPoint v0.7
+    participant FE as Frontend (Client)
     participant EP as EntryPoint v0.7
-    participant MV as MessageVault (Smart Account)
+    participant MV as MessageVault
 
-    rect rgb(240,240,240)
-    Note over U,FE: Direct owner call
-    U->>FE: Click "Send Message"
-    FE->>MV: sendMessageToWallet("hello") (EOA owner)
-    MV-->>MV: validate owner permissions
-    MV-->>MV: store message, increment id
-    MV-->>FE: emit MessageStored
-    end
-
-    rect rgb(240,240,240)
-    Note over U,EP: ERC‑4337 AA flow
-    U->>FE: Prepare message
-    FE->>EP: submit UserOperation (callData=sendMessageToWallet)
-    EP->>MV: validateUserOp(userOp, userOpHash)
-    MV-->>EP: signature valid (EIP‑191), capture temporary signer
-    EP->>MV: execute sendMessageToWallet
-    MV-->>MV: store message from validated signer
-    MV-->>EP: emit MessageStored
-    end
+    FE->>EP: eth_sendUserOperation
+    EP->>MV: validateUserOp
+    MV-->>EP: Signature valid
+    EP->>MV: Execute callData
+    MV-->>EP: Emit MessageStored
+    EP-->>FE: Operation result
 ```
  
-ERC‑4337 Components — Bundler & Paymaster
-- Bundler: collects `UserOperation`s from clients, simulates validation against `EntryPoint` (`simulateValidation`), and submits batches via `handleOps`. It ensures operations are valid and pays the L1 transaction gas, recovering fees from accounts or paymasters.
-- Paymaster: optionally sponsors gas for `UserOperation`s by providing `paymasterAndData`. A managed Paymaster (e.g., Alchemy Gas Manager) can cover gas so end users don’t need ETH. If not sponsoring, the account’s EntryPoint deposit must cover prefund.
-- In this project: the smart account is `MessageVault`; the Paymaster is external (not part of the contract). The backend README documents using a managed Paymaster and shows how to deposit/withdraw to EntryPoint when needed.
+## ERC-4337 Components — Bundler & Paymaster
 
-Interaction Flow — Bundler & Paymaster
+### Bundler
+Collects `UserOperation`s from clients, simulates validation against `EntryPoint` (`simulateValidation`), and submits batches via `handleOps`. It ensures operations are valid and pays the L1 transaction gas, recovering fees from accounts or paymasters.
+
+### Paymaster
+Optionally sponsors gas for `UserOperation`s by providing `paymasterAndData`. A managed Paymaster (e.g., Alchemy Gas Manager) can cover gas so end users don’t need ETH. If not sponsoring, the account’s EntryPoint deposit must cover prefund.
+
+### Project specifics
+In this project, the smart account is `MessageVault`; the Paymaster is external (not part of the contract). The backend README documents using a managed Paymaster and shows how to deposit/withdraw to EntryPoint when needed.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    title Project specifics — MessageVault with EntryPoint v0.7 and Bundler
+    participant FE as Frontend (Client)
+    participant B as Bundler
+    participant EP as EntryPoint v0.7
+    participant PM as Paymaster (external)
+    participant MV as MessageVault
+
+    A->>B: eth_sendUserOperation(userOp)
+    B->>EP: simulateValidation(userOp)
+    EP->>MV: validateUserOp(userOp)
+    MV-->>EP: Signature OK; selector allowed
+    EP->>PM: validatePaymasterUserOp (if sponsored)
+    Note over B,EP: If validation passes
+    B->>EP: handleOps([userOp])
+    EP->>MV: Execute callData
+    MV-->>EP: Emit MessageStored
+    EP-->>B: receipt
+    B-->>A: Operation result
+```
+
+## Interaction Flow — Bundler & Paymaster
 ```mermaid
 sequenceDiagram
     participant FE as Frontend (Client)
@@ -121,7 +161,7 @@ Notes
   - Studio-first: deploy a new version in Studio.
   - CLI (optional): in a temporary folder run `graph init`, update `subgraph.yaml`/`schema.graphql`, then `graph codegen && graph build`, and `graph deploy <SUBGRAPH_SLUG> --version-label v0.0.X`. Do not commit these files.
 - Endpoints
-  - Find endpoints in Studio. Configure your app via `VITE_SUBGRAPH_URL`. Do not hardcode URLs.
+- Find endpoints in Studio. Configure your frontend via `VITE_SUBGRAPH_URL`. Do not hardcode URLs.
 
 ## Requirements
 - Node.js 18+
