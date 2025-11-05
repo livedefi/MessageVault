@@ -39,7 +39,6 @@ VITE_ALCHEMY_API_KEY=your-alchemy-api-key
 VITE_GAS_MANAGER_POLICY_ID=your-gas-manager-policy-id
 VITE_ENTRYPOINT_ADDRESS=0x0000000071727De22E5E9d8BAf0edAc6f37da032
 VITE_MESSAGE_VAULT_ADDRESS=0xYourDeployedMessageVault
-ALLOWED_ORIGINS=https://your-app.vercel.app,http://localhost:5173
 VITE_SUBGRAPH_URL=https://api.studio.thegraph.com/query/<org>/<slug>/<version>
 VITE_SUBGRAPH_POLL_MS=10000
 VITE_SUBGRAPH_MAX_POLL_MS=60000
@@ -47,8 +46,7 @@ VITE_SUBGRAPH_JITTER_PCT=0.3
 ```
 
 Notes:
-- `ALLOWED_ORIGINS` must be a comma‑separated list without quotes.
-- `VITE_SUBGRAPH_URL` must be reachable; otherwise the UI will show an error.
+ - `VITE_SUBGRAPH_URL` must be reachable; otherwise the UI will show an error.
  - `VITE_SUBGRAPH_POLL_MS`: base polling interval in ms (e.g., `10000` = 10s).
  - `VITE_SUBGRAPH_MAX_POLL_MS`: upper limit for exponential backoff when errors/no new data.
  - `VITE_SUBGRAPH_JITTER_PCT`: jitter percentage between `0` and `1` to add random variation to the current interval and avoid synchronized requests (e.g., `0.3` ≈ ±30%).
@@ -116,7 +114,6 @@ Notes:
 
 ## Security Notes
 - Do not expose private keys in the frontend.
- - `ALLOWED_ORIGINS` only applies if you introduce custom dev endpoints; otherwise it is unused.
 - Do not commit `.env` files; manage secrets via environment-specific configuration.
 
 ## Build & Deploy
