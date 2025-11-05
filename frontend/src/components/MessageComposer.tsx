@@ -57,6 +57,8 @@ export default function MessageComposer({ pushToast, onSentSuccess }: Props) {
       await sendMessageToWalletAA(content.trim())
       setContent('')
       onSentSuccess?.()
+      // Inform user about subgraph indexing delay (~5s)
+      pushToast('info', 'Message sent. Waiting for indexing (~5s)…')
     } catch (e: any) {
       const code = e?.code ?? e?.data?.originalError?.code
       const msg = e?.message ?? 'Failed to send'
@@ -89,6 +91,8 @@ export default function MessageComposer({ pushToast, onSentSuccess }: Props) {
         pushToast('success', 'Message sent (EOA)')
         setContent('')
         onSentSuccess?.()
+        // Inform user about subgraph indexing delay (~5s)
+        pushToast('info', 'Message sent. Waiting for indexing (~5s)…')
       } else {
         pushToast('error', 'Transaction did not confirm')
       }
