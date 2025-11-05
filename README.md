@@ -105,17 +105,17 @@ sequenceDiagram
     participant PM as Paymaster (external)
     participant MV as MessageVault
 
-    A->>B: eth_sendUserOperation(userOp)
+    FE->>B: eth_sendUserOperation(userOp)
     B->>EP: simulateValidation(userOp)
     EP->>MV: validateUserOp(userOp)
-    MV-->>EP: Signature OK; selector allowed
+    MV-->>EP: Signature valid and selector allowed
     EP->>PM: validatePaymasterUserOp (if sponsored)
     Note over B,EP: If validation passes
     B->>EP: handleOps([userOp])
-    EP->>MV: Execute callData
-    MV-->>EP: Emit MessageStored
+    EP->>MV: execute callData
+    MV-->>EP: MessageStored
     EP-->>B: receipt
-    B-->>A: Operation result
+    B-->>FE: Operation result
 ```
 
 ## Interaction Flow — Bundler & Paymaster
