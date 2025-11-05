@@ -6,12 +6,13 @@ export type MessageItem = {
   content: string
 }
 
-type GqlMessage = { id: string; sender: `0x${string}`; content: string }
+type GqlMessage = { id: string; internal_id: string; sender: `0x${string}`; content: string }
 
 const QUERY = `
   query Messages($first: Int = 50, $skip: Int = 0) {
-    messageStoreds(first: $first, skip: $skip, orderBy: id, orderDirection: desc) {
+    messageStoreds(first: $first, skip: $skip, orderBy: internal_id, orderDirection: asc) {
       id
+      internal_id
       sender
       content
     }
@@ -24,6 +25,7 @@ export function useGraphMessages() {
   const [error, setError] = useState<string | null>(null)
   const timerRef = useRef<number | null>(null)
   const lastIdsRef = useRef<Set<string>>(new Set())
+  const initializedRef = useRef<boolean>(false)
   const attemptRef = useRef<number>(0)
   const refreshRef = useRef<(() => void) | null>(null)
 
@@ -59,17 +61,31 @@ export function useGraphMessages() {
         const json = await res.json()
         if (json.errors) throw new Error(json.errors?.[0]?.message ?? 'GraphQL error')
         const rows: GqlMessage[] = json.data?.messageStoreds ?? []
-        const next: MessageItem[] = []
-        for (const r of rows) {
-          if (!lastIdsRef.current.has(r.id)) {
-            lastIdsRef.current.add(r.id)
-          }
-          next.push({ id: BigInt(r.id), sender: r.sender, content: r.content })
-        }
-        // Limit to 200 messages
-        if (next.length > 200) next.splice(200)
+        // Transform rows to items using the on-chain counter (internal_id)
+        const items = rows.map((r) => ({ id: BigInt(r.internal_id), sender: r.sender, content: r.content }))
+
         if (mounted) {
-          setMessages(next)
+          setMessages((prev) => {
+            // Initial population: keep server order, track ids
+            if (!initializedRef.current || prev.length === 0) {
+              for (const r of rows) lastIdsRef.current.add(r.internal_id)
+              initializedRef.current = true
+              const initial = items.slice(0, 200)
+              return initial
+            }
+            // Subsequent polls: append only new items (oldest-first view)
+            const additions: MessageItem[] = []
+            for (const r of rows) {
+              if (!lastIdsRef.current.has(r.internal_id)) {
+                lastIdsRef.current.add(r.internal_id)
+                additions.push({ id: BigInt(r.internal_id), sender: r.sender, content: r.content })
+              }
+            }
+            if (additions.length === 0) return prev
+            const merged = [...prev, ...additions]
+            if (merged.length > 200) merged.splice(200)
+            return merged
+          })
           setError(null)
         }
         return true

@@ -32,7 +32,7 @@ Scope: This document covers only the backend (Hardhat/contracts/Ignition). See a
 - A funded Sepolia EOA for deployment and initial stake/deposit.
 
 ## Project Layout
-- `contracts/MessageVault.sol`: Wallet contract that stores messages and points to EntryPoint.
+- `contracts/MessageVault.sol`: Smart account that emits `MessageStored` events (no on-chain message storage) and points to EntryPoint.
  
 - `ignition/modules/*`: Deployment modules for AA setup and the wallet.
 - `params/*.json`: Ignition parameter files (BigInt values with trailing `n`).

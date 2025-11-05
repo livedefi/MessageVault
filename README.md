@@ -46,7 +46,7 @@ How the DApp & Contract Work
   - `owner` can call wallet functions directly.
   - `EntryPoint` may call on behalf of a validated signer through `validateUserOp` (AA flow).
 - Core actions:
-  - `sendMessageToWallet(string content)`: stores `content`, emits `MessageStored(recipient=this, sender=actor, id, content)`, increments `nextMessageId`.
+  - `sendMessageToWallet(string content)`: emits `MessageStored(recipient=this, sender=actor, id, content)` and increments `nextMessageId` (no on-chain persistence of `content`; rely on events).
   - `setEntryPoint(address)`: wires the wallet to a canonical EntryPoint (v0.7 on Sepolia).
   - `addDeposit()` and `withdrawDepositTo(address,uint256)`: manage EntryPoint deposits for AA operations.
 - Indexing:
@@ -143,6 +143,7 @@ Benefits & Utilities
 - Better UX with Account Abstraction: users can interact without owning the wallet or directly spending gas (with a Paymaster).
 - Fine‑grained permissioning: only the `sendMessageToWallet` selector is allowed for non‑owner AA calls, reducing attack surface.
 - Event‑driven architecture: clean integration with The Graph for analytics, feeds, and app state.
+- Efficiency: messages are not stored in contract storage; only events are emitted. Clients read via The Graph for pagination, ordering, and low gas overhead.
 - Operational resilience: deposit management via EntryPoint and robust balance reads across variants.
 - Simpler client logic: single `sendMessageToWallet` entry captures both owner and AA flows.
 

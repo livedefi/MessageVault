@@ -78,6 +78,10 @@ Notes:
 - If `VITE_SUBGRAPH_URL` is missing, an on-screen error is shown and the list stays empty.
 - Polling summary: `POLL_MS` (base), `MAX_POLL_MS` (cap), `JITTER_PCT` (randomization to prevent synchronized bursts).
 
+### Why events (not storage)
+- Messages are not persisted in contract storage; `MessageVault` emits `MessageStored` events and increments a counter.
+- Reading via The Graph is more efficient (lower gas to write), offers pagination and consistent ordering (e.g., `internal_id`), and keeps on-chain state minimal.
+
 ## ERC‑4337 (AA) with Alchemy Account Kit
 - Alchemy transport is configured via `VITE_ALCHEMY_API_KEY` and the Sepolia chain.
 - `ENTRYPOINT_ADDRESS` and `MESSAGE_VAULT_ADDRESS` are read from `.env` via `src/config/contracts.ts`.
