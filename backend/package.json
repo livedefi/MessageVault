@@ -1,0 +1,33 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "check:deposit": "hardhat run scripts/checkDeposit.ts --network sepolia",
+    "check:aa": "hardhat run scripts/check-aa-requirements.ts --network sepolia",
+    "withdraw:all:v7": "hardhat run scripts/withdraw-all.ts --network sepolia",
+    "verify": "hardhat run scripts/verify-etherscan-v2.ts --network sepolia"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ignition": "^3.0.3",
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-verify": "^3.0.4",
+    "@types/chai": "^4.3.20",
+    "@types/chai-as-promised": "^8.0.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.18.12",
+    "chai": "^5.3.3",
+    "ethers": "^6.15.0",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.0.9",
+    "mocha": "^11.7.4",
+    "typescript": "~5.8.0"
+  },
+  "dependencies": {
+    "@account-abstraction/contracts": "^0.8.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "dotenv": "^17.2.3"
+  }
+}

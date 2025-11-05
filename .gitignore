@@ -1,0 +1,11 @@
+# Exclude local subgraph folder (Studio-first; do not version)
+subgraph/
+
+# Optional: common local artifacts (adjust to your workflow)
+*.env
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.DS_Store
