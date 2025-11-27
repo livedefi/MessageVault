@@ -10,6 +10,8 @@ See also: [Frontend README](frontend/README.md) · [Backend README](backend/READ
 
 A live demo is available at https://messagevault.casaislabs.com.
 
+Contract on Etherscan (Sepolia): https://sepolia.etherscan.io/address/0xDB069580321E87f30eA171bf20a45BB18A3E5B09
+
 Important: This repository does not include or version a local `subgraph/` folder. Manage your Subgraph in The Graph Studio and do not commit `subgraph/`.
 
 ## Table of Contents
