@@ -6,9 +6,6 @@ See also: [Frontend README](frontend/README.md) · [Backend README](backend/READ
 
 ![MessageVault banner](img.png)
 
-## Live Demo
-
-A live demo is available at https://messagevault.casaislabs.com.
 
 Contract on Etherscan (Sepolia): https://sepolia.etherscan.io/address/0xDB069580321E87f30eA171bf20a45BB18A3E5B09
 
