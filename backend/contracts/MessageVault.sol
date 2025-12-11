@@ -71,6 +71,7 @@ contract MessageVault is IAccount, ReentrancyGuard {
         uint32 s;
         assembly {
             // First 4 bytes at callData.offset are the inner selector
+            // Stores to s
             s := shr(224, calldataload(callData.offset))
         }
         return bytes4(s);
